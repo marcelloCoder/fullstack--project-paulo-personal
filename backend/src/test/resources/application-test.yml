@@ -1,0 +1,20 @@
+spring:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+app:
+  seguranca:
+    jwt-segredo: test-segredo-com-pelo-menos-32-chars
+    jwt-expiracao: 1h
+    cookie-nome: sessao
+    cookie-secure: false
+  admin:
+    nome: Paulo Roberto
+    email: paulo@test.local
+    senha: senha-de-teste
+  cors:
+    origens:
+      - http://localhost:3000

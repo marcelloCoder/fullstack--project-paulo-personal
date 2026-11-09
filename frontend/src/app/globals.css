@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-fundo: #f3f0eb;
+  --color-cartao: #fbf9f6;
+  --color-tinta: #1c1c1c;
+  --color-muted: #5e5954;
+  --color-linha: #e3ddd4;
+  --color-acao: #c8102e;
+  --color-acao-hover: #9e0d24;
+  --color-whatsapp: #128c7e;
+  --font-sans: var(--font-dm), "Segoe UI", sans-serif;
+  --font-display: var(--font-oswald), "Arial Narrow", sans-serif;
+  --font-script: var(--font-script), cursive;
+}
+
+body {
+  background: #f3f0eb;
+  color: #1c1c1c;
+}
+
+:focus-visible {
+  outline: 2px solid #c8102e;
+  outline-offset: 2px;
+}

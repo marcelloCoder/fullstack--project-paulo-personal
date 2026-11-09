@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
+app:
+  seguranca:
+    jwt-segredo: ${JWT_SEGREDO}
+    jwt-expiracao: 12h
+    cookie-nome: sessao
+    cookie-secure: true
+  admin:
+    nome: Paulo Roberto
+    email: ${ADMIN_EMAIL}
+    senha: ${ADMIN_PASSWORD}
+  cors:
+    origens:
+      - ${FRONTEND_ORIGIN}
