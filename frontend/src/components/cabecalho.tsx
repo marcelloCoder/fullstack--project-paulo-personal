@@ -1,10 +1,11 @@
 "use client";
 
+import { MenuConta } from "@/components/menu-conta";
 import { useAuth } from "@/components/provedor-auth";
 import Link from "next/link";
 
 export function Cabecalho() {
-  const { usuario, pronto, sair } = useAuth();
+  const { usuario, pronto } = useAuth();
 
   return (
     <header className="sticky top-0 z-20 border-b border-linha bg-cartao/95 backdrop-blur">
@@ -31,15 +32,8 @@ export function Cabecalho() {
               Minha ficha
             </Link>
           )}
-          {pronto && usuario && (
-            <Link href="/perfil" className="hover:text-acao">
-              Meu perfil
-            </Link>
-          )}
           {pronto && usuario ? (
-            <button type="button" onClick={() => void sair()} className="hover:text-acao">
-              Sair
-            </button>
+            <MenuConta />
           ) : (
             <Link href="/login" className="font-display uppercase tracking-[0.12em] text-acao">
               Entrar

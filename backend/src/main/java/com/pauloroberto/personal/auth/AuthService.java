@@ -61,4 +61,38 @@ public class AuthService {
         logger.info("Login de {}", usuario.getEmail());
         return UsuarioResponse.de(usuario);
     }
+
+    @Transactional
+    public UsuarioResponse atualizarPerfil(Long id, PerfilAtualizacaoRequest request) {
+        Usuario usuario = carregar(id);
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
+        usuarioRepository.findByEmailIgnoreCase(email).ifPresent(outro -> {
+            if (!outro.getId().equals(usuario.getId())) {
+                throw new RegraNegocioException(HttpStatus.CONFLICT, "Este e-mail já está em uso.");
+            }
+        });
+        usuario.setNome(request.nome().trim());
+        usuario.setEmail(email);
+        usuario.setTelefone(Textos.limpar(request.telefone()));
+        if (usuario.getPapel() == Papel.ALUNO) {
+            usuario.setObjetivo(Textos.limpar(request.objetivo()));
+        }
+        logger.info("Perfil atualizado: {}", usuario.getId());
+        return UsuarioResponse.de(usuario);
+    }
+
+    @Transactional
+    public void alterarSenha(Long id, SenhaAtualizacaoRequest request) {
+        Usuario usuario = carregar(id);
+        if (!passwordEncoder.matches(request.senhaAtual(), usuario.getSenhaHash())) {
+            throw new RegraNegocioException(HttpStatus.BAD_REQUEST, "A senha atual não confere.");
+        }
+        usuario.setSenhaHash(passwordEncoder.encode(request.senhaNova()));
+        logger.info("Senha alterada: {}", usuario.getId());
+    }
+
+    private Usuario carregar(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new CredenciaisInvalidasException("Faça login para continuar."));
+    }
 }

@@ -17,11 +17,10 @@ function formatarData(valor: string | null) {
 }
 
 export function MeuPerfil() {
-  const { usuario, pronto, sair } = useAuth();
+  const { usuario, pronto } = useAuth();
   const router = useRouter();
   const [ficha, setFicha] = useState<string | null>(null);
   const [semFicha, setSemFicha] = useState(false);
-  const [saindo, setSaindo] = useState(false);
 
   useEffect(() => {
     if (!pronto) return;
@@ -84,17 +83,9 @@ export function MeuPerfil() {
             Ver minha ficha
           </Link>
         )}
-        <button
-          type="button"
-          className={botaoSecundario}
-          disabled={saindo}
-          onClick={() => {
-            setSaindo(true);
-            void sair();
-          }}
-        >
-          {saindo ? "Saindo..." : "Sair"}
-        </button>
+        <Link href="/configuracoes" className={botaoSecundario}>
+          Editar perfil
+        </Link>
       </div>
     </div>
   );

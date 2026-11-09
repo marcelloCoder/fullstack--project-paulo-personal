@@ -92,6 +92,62 @@ class AuthServiceTest {
                 .hasMessage("Sua conta está desativada. Fale com o Paulo.");
     }
 
+    @Test
+    void alunoAtualizaProprioPerfilSemTrocarPapel() {
+        Usuario usuario = alunoAtivo();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailIgnoreCase("ana@test.local")).thenReturn(Optional.of(usuario));
+
+        UsuarioResponse resposta = authService.atualizarPerfil(
+                1L,
+                new PerfilAtualizacaoRequest("Ana Souza", "ana@test.local", "35988887777", "Ganhar força")
+        );
+
+        assertThat(resposta.nome()).isEqualTo("Ana Souza");
+        assertThat(resposta.telefone()).isEqualTo("35988887777");
+        assertThat(resposta.objetivo()).isEqualTo("Ganhar força");
+        assertThat(usuario.getPapel()).isEqualTo(Papel.ALUNO);
+    }
+
+    @Test
+    void recusaEmailDeOutraConta() {
+        Usuario usuario = alunoAtivo();
+        Usuario outro = new Usuario();
+        outro.setId(2L);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailIgnoreCase("paulo@personal.local")).thenReturn(Optional.of(outro));
+
+        assertThatThrownBy(() -> authService.atualizarPerfil(
+                1L,
+                new PerfilAtualizacaoRequest("Ana", "paulo@personal.local", null, null)
+        )).isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
+    void administradorNaoGravaObjetivoDeAluno() {
+        Usuario admin = alunoAtivo();
+        admin.setPapel(Papel.ADMIN);
+        admin.setObjetivo(null);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(admin));
+        when(usuarioRepository.findByEmailIgnoreCase("ana@test.local")).thenReturn(Optional.of(admin));
+
+        authService.atualizarPerfil(1L, new PerfilAtualizacaoRequest("Paulo", "ana@test.local", null, "Ignorar"));
+
+        assertThat(admin.getObjetivo()).isNull();
+        assertThat(admin.getPapel()).isEqualTo(Papel.ADMIN);
+    }
+
+    @Test
+    void recusaSenhaAtualIncorreta() {
+        Usuario usuario = alunoAtivo();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("errada", "hash")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.alterarSenha(1L, new SenhaAtualizacaoRequest("errada", "senha-nova")))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessage("A senha atual não confere.");
+    }
+
     private Usuario alunoAtivo() {
         Usuario usuario = new Usuario();
         usuario.setId(1L);

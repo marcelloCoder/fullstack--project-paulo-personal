@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,6 +56,23 @@ public class AuthController {
     @GetMapping("/me")
     public UsuarioResponse eu(Authentication authentication) {
         return UsuarioResponse.de(atual(authentication));
+    }
+
+    @PutMapping("/me")
+    public UsuarioResponse atualizar(
+            @Valid @RequestBody PerfilAtualizacaoRequest request,
+            Authentication authentication
+    ) {
+        return authService.atualizarPerfil(atual(authentication).getId(), request);
+    }
+
+    @PutMapping("/me/senha")
+    public ResponseEntity<Void> alterarSenha(
+            @Valid @RequestBody SenhaAtualizacaoRequest request,
+            Authentication authentication
+    ) {
+        authService.alterarSenha(atual(authentication).getId(), request);
+        return ResponseEntity.noContent().build();
     }
 
     private void escreverCookie(HttpServletResponse response, String token) {
