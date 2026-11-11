@@ -3,12 +3,29 @@
 import { MenuConta } from "@/components/menu-conta";
 import { useAuth } from "@/components/provedor-auth";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 export function Cabecalho() {
   const { usuario, pronto } = useAuth();
+  const cabecalho = useRef<HTMLElement>(null);
+  const [altura, setAltura] = useState(0);
+
+  useEffect(() => {
+    const elemento = cabecalho.current;
+    if (!elemento) return;
+    const medir = () => setAltura(elemento.offsetHeight);
+    medir();
+    const observador = new ResizeObserver(medir);
+    observador.observe(elemento);
+    return () => observador.disconnect();
+  }, []);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-linha bg-cartao/95 backdrop-blur">
+    <>
+    <header
+      ref={cabecalho}
+      className="fixed inset-x-0 top-0 z-30 border-b border-linha bg-cartao/95 backdrop-blur"
+    >
       <div className="h-1 bg-acao" />
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="leading-none">
@@ -42,5 +59,7 @@ export function Cabecalho() {
         </nav>
       </div>
     </header>
+    <div aria-hidden="true" style={{ height: altura }} />
+    </>
   );
 }

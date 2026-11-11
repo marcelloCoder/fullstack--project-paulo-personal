@@ -8,10 +8,16 @@
   --color-linha: #e3ddd4;
   --color-acao: #c8102e;
   --color-acao-hover: #9e0d24;
+  --color-ativo: #1b7f4e;
+  --color-ativo-hover: #166840;
   --color-whatsapp: #128c7e;
   --font-sans: var(--font-dm), "Segoe UI", sans-serif;
   --font-display: var(--font-oswald), "Arial Narrow", sans-serif;
   --font-script: var(--font-script), cursive;
+}
+
+html {
+  overflow-y: scroll;
 }
 
 body {

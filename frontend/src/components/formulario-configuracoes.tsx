@@ -1,8 +1,18 @@
 "use client";
 
+import { CampoSenha } from "@/components/campo-senha";
+import { RotuloCampo } from "@/components/rotulo-campo";
 import { useAuth } from "@/components/provedor-auth";
 import { ApiError, api } from "@/lib/api";
+import { temDadosPendentes } from "@/lib/dados-aluno";
 import { botaoAcao, campo } from "@/lib/estilos";
+import {
+  alturaParaTexto,
+  idadeParaTexto,
+  textoParaAltura,
+  textoParaIdade,
+  textoParaPeso,
+} from "@/lib/peso";
 import type { Usuario } from "@/lib/tipos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,6 +24,10 @@ export function FormularioConfiguracoes() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [idade, setIdade] = useState("");
+  const [profissao, setProfissao] = useState("");
+  const [altura, setAltura] = useState("");
+  const [peso, setPeso] = useState("");
   const [objetivo, setObjetivo] = useState("");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [senhaNova, setSenhaNova] = useState("");
@@ -36,6 +50,10 @@ export function FormularioConfiguracoes() {
     setNome(usuario.nome);
     setEmail(usuario.email);
     setTelefone(usuario.telefone ?? "");
+    setIdade(idadeParaTexto(usuario.idade));
+    setProfissao(usuario.profissao ?? "");
+    setAltura(alturaParaTexto(usuario.alturaM));
+    setPeso(usuario.pesoKg == null ? "" : String(usuario.pesoKg).replace(".", ","));
     setObjetivo(usuario.objetivo ?? "");
   }, [usuario]);
 
@@ -49,6 +67,27 @@ export function FormularioConfiguracoes() {
     evento.preventDefault();
     setErroPerfil("");
     setAvisoPerfil("");
+    const idadeNumero = textoParaIdade(idade);
+    const alturaM = textoParaAltura(altura);
+    const pesoKg = textoParaPeso(peso);
+    if (!admin) {
+      if (idadeNumero === null) {
+        setErroPerfil("Informe a idade em anos, por exemplo 28.");
+        return;
+      }
+      if (alturaM === null) {
+        setErroPerfil("Informe a altura em metros, por exemplo 1,70.");
+        return;
+      }
+      if (pesoKg === null) {
+        setErroPerfil("Informe o peso em kg, por exemplo 72,5.");
+        return;
+      }
+      if (!telefone.trim() || !profissao.trim() || !objetivo.trim()) {
+        setErroPerfil("Preencha telefone, profissão e objetivo.");
+        return;
+      }
+    }
     setSalvandoPerfil(true);
     try {
       const atualizado = await api<Usuario>("/api/auth/me", {
@@ -57,6 +96,10 @@ export function FormularioConfiguracoes() {
           nome,
           email,
           telefone,
+          idade: admin ? null : idadeNumero,
+          profissao: admin ? null : profissao,
+          alturaM: admin ? null : alturaM,
+          pesoKg: admin ? null : pesoKg,
           objetivo: admin ? null : objetivo,
         }),
       });
@@ -101,19 +144,73 @@ export function FormularioConfiguracoes() {
 
       <form onSubmit={salvarPerfil} className="mt-8 space-y-4 rounded-md border border-linha bg-cartao p-6">
         <h2 className="font-display text-lg uppercase tracking-wide">Dados do perfil</h2>
+        {!admin &&
+          temDadosPendentes({
+            telefone,
+            idade: textoParaIdade(idade),
+            profissao,
+            alturaM: textoParaAltura(altura),
+            pesoKg: textoParaPeso(peso),
+            objetivo,
+          }) && (
+            <p className="text-sm text-acao">Há dados pendentes. Campos com * ainda precisam ser preenchidos.</p>
+          )}
         <Campo rotulo="Nome" valor={nome} aoMudar={setNome} obrigatorio autoComplete="name" />
         <Campo rotulo="E-mail" tipo="email" valor={email} aoMudar={setEmail} obrigatorio autoComplete="email" />
-        <Campo rotulo="Telefone" valor={telefone} aoMudar={setTelefone} autoComplete="tel" />
+        <Campo
+          rotulo="Telefone"
+          valor={telefone}
+          aoMudar={setTelefone}
+          obrigatorio={!admin}
+          autoComplete="tel"
+        />
         {!admin && (
-          <label className="block text-sm">
-            Objetivo
-            <textarea
-              value={objetivo}
-              maxLength={200}
-              onChange={(evento) => setObjetivo(evento.target.value)}
-              className={`${campo} mt-1 min-h-24`}
-            />
-          </label>
+          <>
+            <label className="block text-sm">
+              <RotuloCampo texto="Idade" pendente={!idade.trim()} />
+              <input
+                required
+                inputMode="numeric"
+                placeholder="28"
+                value={idade}
+                onChange={(evento) => setIdade(evento.target.value)}
+                className={`${campo} mt-1`}
+              />
+            </label>
+            <Campo rotulo="Profissão" valor={profissao} aoMudar={setProfissao} obrigatorio />
+            <label className="block text-sm">
+              <RotuloCampo texto="Altura (m)" pendente={!altura.trim()} />
+              <input
+                required
+                inputMode="decimal"
+                placeholder="1,70"
+                value={altura}
+                onChange={(evento) => setAltura(evento.target.value)}
+                className={`${campo} mt-1`}
+              />
+            </label>
+            <label className="block text-sm">
+              <RotuloCampo texto="Peso (kg)" pendente={!peso.trim()} />
+              <input
+                required
+                inputMode="decimal"
+                placeholder="72,5"
+                value={peso}
+                onChange={(evento) => setPeso(evento.target.value)}
+                className={`${campo} mt-1`}
+              />
+            </label>
+            <label className="block text-sm">
+              <RotuloCampo texto="Objetivo" pendente={!objetivo.trim()} />
+              <textarea
+                required
+                value={objetivo}
+                maxLength={200}
+                onChange={(evento) => setObjetivo(evento.target.value)}
+                className={`${campo} mt-1 min-h-24`}
+              />
+            </label>
+          </>
         )}
         {erroPerfil && <p className="text-sm text-acao">{erroPerfil}</p>}
         {avisoPerfil && <p className="text-sm text-whatsapp">{avisoPerfil}</p>}
@@ -124,17 +221,15 @@ export function FormularioConfiguracoes() {
 
       <form onSubmit={salvarSenha} className="mt-6 space-y-4 rounded-md border border-linha bg-cartao p-6">
         <h2 className="font-display text-lg uppercase tracking-wide">Senha</h2>
-        <Campo
+        <CampoSenha
           rotulo="Senha atual"
-          tipo="password"
           valor={senhaAtual}
           aoMudar={setSenhaAtual}
           obrigatorio
           autoComplete="current-password"
         />
-        <Campo
+        <CampoSenha
           rotulo="Nova senha"
-          tipo="password"
           valor={senhaNova}
           aoMudar={setSenhaNova}
           obrigatorio
@@ -177,7 +272,7 @@ function Campo({
 }) {
   return (
     <label className="block text-sm">
-      {rotulo}
+      <RotuloCampo texto={rotulo} pendente={obrigatorio && !valor.trim()} />
       <input
         type={tipo}
         required={obrigatorio}

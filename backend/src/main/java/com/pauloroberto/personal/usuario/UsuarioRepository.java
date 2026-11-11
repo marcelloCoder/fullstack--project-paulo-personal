@@ -23,7 +23,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
                 or lower(u.nome) like lower(concat('%', :busca, '%'))
                 or lower(u.email) like lower(concat('%', :busca, '%'))
               )
-            order by u.nome asc
+            order by u.ativo desc, u.nome asc
             """)
     List<Usuario> buscarAlunos(@Param("papel") Papel papel, @Param("busca") String busca);
 }

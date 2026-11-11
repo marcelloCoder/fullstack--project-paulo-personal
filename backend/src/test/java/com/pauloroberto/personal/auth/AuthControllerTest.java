@@ -41,7 +41,7 @@ class AuthControllerTest {
     @Test
     void loginGravaCookieHttpOnly() throws Exception {
         when(authService.autenticar(any())).thenReturn(
-                new UsuarioResponse(1L, "Ana", "ana@test.local", null, Papel.ALUNO, null, null, true, null)
+                new UsuarioResponse(1L, "Ana", "ana@test.local", null, Papel.ALUNO, null, null, true, null, null, null, null, null)
         );
 
         mockMvc.perform(post("/api/auth/login")

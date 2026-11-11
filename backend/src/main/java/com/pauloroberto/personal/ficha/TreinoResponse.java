@@ -7,6 +7,7 @@ public record TreinoResponse(
         String nome,
         int ordem,
         String observacao,
+        List<Integer> diasSemana,
         List<ExercicioResponse> exercicios
 ) {
 }

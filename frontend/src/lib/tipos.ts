@@ -9,6 +9,10 @@ export type Usuario = {
   objetivo: string | null;
   observacao: string | null;
   ativo: boolean;
+  idade: number | null;
+  profissao: string | null;
+  alturaM: number | null;
+  pesoKg: number | null;
   criadoEm: string | null;
 };
 
@@ -20,6 +24,10 @@ export type Aluno = {
   ativo: boolean;
   objetivo: string | null;
   observacao: string | null;
+  idade: number | null;
+  profissao: string | null;
+  alturaM: number | null;
+  pesoKg: number | null;
   criadoEm: string;
 };
 
@@ -28,9 +36,10 @@ export type Exercicio = {
   ordem: number;
   nome: string;
   series: number;
-  repeticoes: string;
-  carga: string | null;
-  descanso: string | null;
+  repeticoes: number;
+  cargaKg: number;
+  descansoSegundos: number;
+  observacao: string | null;
 };
 
 export type Treino = {
@@ -38,6 +47,7 @@ export type Treino = {
   nome: string;
   ordem: number;
   observacao: string | null;
+  diasSemana: number[];
   exercicios: Exercicio[];
 };
 
@@ -55,13 +65,15 @@ export type Ficha = {
 export type ExercicioRascunho = {
   nome: string;
   series: number;
-  repeticoes: string;
-  carga: string;
-  descanso: string;
+  repeticoes: number;
+  cargaKg: number;
+  descansoSegundos: number;
+  observacao: string;
 };
 
 export type TreinoRascunho = {
   nome: string;
   observacao: string;
+  diasSemana: number[];
   exercicios: ExercicioRascunho[];
 };

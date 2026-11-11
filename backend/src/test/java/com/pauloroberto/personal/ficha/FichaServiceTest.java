@@ -1,6 +1,7 @@
 package com.pauloroberto.personal.ficha;
 
 import com.pauloroberto.personal.comum.RecursoNaoEncontradoException;
+import com.pauloroberto.personal.comum.RegraNegocioException;
 import com.pauloroberto.personal.usuario.Papel;
 import com.pauloroberto.personal.usuario.Usuario;
 import com.pauloroberto.personal.usuario.UsuarioRepository;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +61,7 @@ class FichaServiceTest {
         FichaResponse resposta = fichaService.criar(5L, pedido());
 
         assertThat(resposta.ativa()).isTrue();
+        assertThat(aluno.isAtivo()).isTrue();
         assertThat(resposta.titulo()).isEqualTo("Hipertrofia");
         assertThat(resposta.treinos()).hasSize(1);
         assertThat(resposta.treinos().getFirst().exercicios()).hasSize(1);
@@ -90,6 +93,68 @@ class FichaServiceTest {
         verify(fichaRepository).flush();
     }
 
+    @Test
+    void excluirFichaAtivaAtivaOutraEMantemAlunoAtivo() {
+        Usuario aluno = aluno();
+        aluno.setAtivo(true);
+        Ficha ativa = ficha(2L, aluno, true);
+        Ficha outra = ficha(3L, aluno, false);
+        when(fichaRepository.findById(2L)).thenReturn(Optional.of(ativa));
+        when(fichaRepository.findByAlunoIdOrderByInicioDesc(5L)).thenReturn(List.of(outra));
+        when(fichaRepository.existsByAlunoId(5L)).thenReturn(true);
+
+        fichaService.excluir(2L);
+
+        verify(fichaRepository).delete(ativa);
+        assertThat(outra.isAtiva()).isTrue();
+        assertThat(aluno.isAtivo()).isTrue();
+    }
+
+    @Test
+    void excluirUltimaFichaDesativaAluno() {
+        Usuario aluno = aluno();
+        aluno.setAtivo(true);
+        Ficha unica = ficha(2L, aluno, true);
+        when(fichaRepository.findById(2L)).thenReturn(Optional.of(unica));
+        when(fichaRepository.findByAlunoIdOrderByInicioDesc(5L)).thenReturn(List.of());
+        when(fichaRepository.existsByAlunoId(5L)).thenReturn(false);
+
+        fichaService.excluir(2L);
+
+        verify(fichaRepository).delete(unica);
+        assertThat(aluno.isAtivo()).isFalse();
+    }
+
+    @Test
+    void rejeitaDoisTreinosNoMesmoDia() {
+        when(usuarioRepository.findByIdAndPapel(5L, Papel.ALUNO)).thenReturn(Optional.of(aluno()));
+
+        FichaRequest pedido = new FichaRequest(
+                "Hipertrofia",
+                "Ganho",
+                null,
+                LocalDate.of(2026, 11, 9),
+                List.of(
+                        new TreinoRequest(
+                                "Peito",
+                                null,
+                                List.of(1),
+                                List.of(new ExercicioRequest("Supino", 4, 10, new BigDecimal("20"), 90, null))
+                        ),
+                        new TreinoRequest(
+                                "Costas",
+                                null,
+                                List.of(1),
+                                List.of(new ExercicioRequest("Remada", 4, 10, new BigDecimal("20"), 90, null))
+                        )
+                )
+        );
+
+        assertThatThrownBy(() -> fichaService.criar(5L, pedido))
+                .isInstanceOf(RegraNegocioException.class)
+                .hasMessage("O dia segunda-feira já está atribuído a outro treino.");
+    }
+
     private Usuario aluno() {
         Usuario aluno = new Usuario();
         aluno.setId(5L);
@@ -117,7 +182,8 @@ class FichaServiceTest {
                 List.of(new TreinoRequest(
                         "Treino A",
                         null,
-                        List.of(new ExercicioRequest("Supino", 4, "8-12", "20 kg", "90s"))
+                        List.of(1),
+                        List.of(new ExercicioRequest("Supino", 4, 10, new BigDecimal("20"), 90, "Controle a descida"))
                 ))
         );
     }

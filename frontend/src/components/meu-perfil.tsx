@@ -3,6 +3,9 @@
 import { useAuth } from "@/components/provedor-auth";
 import { ApiError, api } from "@/lib/api";
 import { botaoAcao, botaoSecundario } from "@/lib/estilos";
+import { RotuloCampo } from "@/components/rotulo-campo";
+import { temDadosPendentes } from "@/lib/dados-aluno";
+import { formatarAltura, formatarIdade, formatarPeso } from "@/lib/peso";
 import type { Ficha } from "@/lib/tipos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -59,16 +62,46 @@ export function MeuPerfil() {
             : "Sua conta de aluno."}
       </p>
 
+      {!admin && temDadosPendentes(usuario) && (
+        <p className="mt-4 text-sm font-medium text-acao">dados pendentes</p>
+      )}
+
       <dl className="mt-8 divide-y divide-linha overflow-hidden rounded-md border border-linha bg-cartao">
         <Item rotulo="E-mail" valor={usuario.email} />
-        <Item rotulo="Telefone" valor={usuario.telefone || "Não informado"} />
+        <Item
+          rotulo="Telefone"
+          valor={usuario.telefone || "Não informado"}
+          pendente={!admin && !usuario.telefone}
+        />
+        {!admin && (
+          <Item rotulo="Idade" valor={formatarIdade(usuario.idade)} pendente={usuario.idade == null} />
+        )}
+        {!admin && (
+          <Item
+            rotulo="Profissão"
+            valor={usuario.profissao || "Não informado"}
+            pendente={!usuario.profissao}
+          />
+        )}
+        {!admin && (
+          <Item rotulo="Altura" valor={formatarAltura(usuario.alturaM)} pendente={usuario.alturaM == null} />
+        )}
+        {!admin && (
+          <Item rotulo="Peso" valor={formatarPeso(usuario.pesoKg)} pendente={usuario.pesoKg == null} />
+        )}
         {admin ? (
           <Item rotulo="Administrador desde" valor={desde || "Data não disponível"} />
         ) : (
           <Item rotulo="Aluno desde" valor={desde || "Data não disponível"} />
         )}
         <Item rotulo="Situação" valor={usuario.ativo ? "Conta ativa" : "Conta desativada"} />
-        {!admin && <Item rotulo="Objetivo" valor={usuario.objetivo || "Ainda não definido com o Paulo"} />}
+        {!admin && (
+          <Item
+            rotulo="Objetivo"
+            valor={usuario.objetivo || "Ainda não definido com o Paulo"}
+            pendente={!usuario.objetivo}
+          />
+        )}
         {!admin && usuario.observacao && <Item rotulo="Observação do Paulo" valor={usuario.observacao} />}
         {!admin && <Item rotulo="Ficha ativa" valor={ficha || (semFicha ? "Nenhuma ficha ativa ainda" : "Carregando...")} />}
       </dl>
@@ -91,10 +124,20 @@ export function MeuPerfil() {
   );
 }
 
-function Item({ rotulo, valor }: { rotulo: string; valor: string }) {
+function Item({
+  rotulo,
+  valor,
+  pendente = false,
+}: {
+  rotulo: string;
+  valor: string;
+  pendente?: boolean;
+}) {
   return (
     <div className="grid gap-1 px-4 py-4 sm:grid-cols-[11rem_1fr] sm:items-baseline">
-      <dt className="text-sm text-muted">{rotulo}</dt>
+      <dt className="text-sm text-muted">
+        <RotuloCampo texto={rotulo} pendente={pendente} />
+      </dt>
       <dd>{valor}</dd>
     </div>
   );

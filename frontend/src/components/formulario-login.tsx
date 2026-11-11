@@ -1,5 +1,6 @@
 "use client";
 
+import { CampoSenha } from "@/components/campo-senha";
 import { useAuth } from "@/components/provedor-auth";
 import { ApiError, api } from "@/lib/api";
 import { botaoAcao, campo } from "@/lib/estilos";
@@ -47,17 +48,13 @@ export function FormularioLogin() {
           className={`${campo} mt-1`}
         />
       </label>
-      <label className="block text-sm">
-        Senha
-        <input
-          type="password"
-          required
-          autoComplete="current-password"
-          value={senha}
-          onChange={(evento) => setSenha(evento.target.value)}
-          className={`${campo} mt-1`}
-        />
-      </label>
+      <CampoSenha
+        rotulo="Senha"
+        valor={senha}
+        aoMudar={setSenha}
+        obrigatorio
+        autoComplete="current-password"
+      />
       {erro && <p className="text-sm text-acao">{erro}</p>}
       <button type="submit" disabled={enviando} className={`${botaoAcao} w-full`}>
         {enviando ? "Entrando..." : "Entrar"}

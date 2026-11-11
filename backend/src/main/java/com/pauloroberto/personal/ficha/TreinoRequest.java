@@ -1,6 +1,8 @@
 package com.pauloroberto.personal.ficha;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -13,6 +15,8 @@ public record TreinoRequest(
         String nome,
         @Size(max = 1000, message = "A observação do treino pode ter no máximo 1000 caracteres.")
         String observacao,
+        @NotNull(message = "Informe os dias da semana do treino.")
+        List<@NotNull @Min(value = 0, message = "Dia da semana inválido.") @Max(value = 6, message = "Dia da semana inválido.") Integer> diasSemana,
         @NotNull(message = "Informe os exercícios do treino.")
         @Valid
         List<ExercicioRequest> exercicios

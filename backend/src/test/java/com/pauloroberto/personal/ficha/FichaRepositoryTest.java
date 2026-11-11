@@ -82,7 +82,9 @@ class FichaRepositoryTest {
         exercicio.setOrdem(0);
         exercicio.setNome("Agachamento");
         exercicio.setSeries(3);
-        exercicio.setRepeticoes("10");
+        exercicio.setRepeticoes(10);
+        exercicio.setCargaKg(java.math.BigDecimal.valueOf(40));
+        exercicio.setDescansoSegundos(90);
         treino.adicionarExercicio(exercicio);
         ficha.adicionarTreino(treino);
         return fichaRepository.save(ficha);

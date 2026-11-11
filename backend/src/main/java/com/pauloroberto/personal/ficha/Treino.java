@@ -1,7 +1,9 @@
 package com.pauloroberto.personal.ficha;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +20,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -43,6 +47,11 @@ public class Treino {
 
     @Column(length = 1000)
     private String observacao;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "treino_dia_semana", joinColumns = @JoinColumn(name = "treino_id"))
+    @Column(name = "dia_semana", nullable = false)
+    private Set<Integer> diasSemana = new LinkedHashSet<>();
 
     @Setter(AccessLevel.NONE)
     @OneToMany(mappedBy = "treino", cascade = CascadeType.ALL, orphanRemoval = true)

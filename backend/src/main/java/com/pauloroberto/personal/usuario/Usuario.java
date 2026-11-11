@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
@@ -37,6 +38,17 @@ public class Usuario {
 
     @Column(length = 20)
     private String telefone;
+
+    @Column(name = "peso_kg", precision = 5, scale = 1)
+    private BigDecimal pesoKg;
+
+    private Integer idade;
+
+    @Column(length = 120)
+    private String profissao;
+
+    @Column(name = "altura_m", precision = 3, scale = 2)
+    private BigDecimal alturaM;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

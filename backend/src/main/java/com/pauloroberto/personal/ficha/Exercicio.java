@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,12 +39,15 @@ public class Exercicio {
     @Column(nullable = false)
     private int series;
 
-    @Column(nullable = false, length = 40)
-    private String repeticoes;
+    @Column(nullable = false)
+    private int repeticoes;
 
-    @Column(length = 80)
-    private String carga;
+    @Column(name = "carga_kg", nullable = false, precision = 8, scale = 2)
+    private BigDecimal cargaKg;
 
-    @Column(length = 40)
-    private String descanso;
+    @Column(name = "descanso_segundos", nullable = false)
+    private int descansoSegundos;
+
+    @Column(length = 500)
+    private String observacao;
 }

@@ -1,5 +1,6 @@
 package com.pauloroberto.personal.usuario;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public record UsuarioResponse(
@@ -11,6 +12,10 @@ public record UsuarioResponse(
         String objetivo,
         String observacao,
         boolean ativo,
+        Integer idade,
+        String profissao,
+        BigDecimal alturaM,
+        BigDecimal pesoKg,
         Instant criadoEm
 ) {
 
@@ -24,6 +29,10 @@ public record UsuarioResponse(
                 usuario.getObjetivo(),
                 usuario.getObservacao(),
                 usuario.isAtivo(),
+                usuario.getIdade(),
+                usuario.getProfissao(),
+                usuario.getAlturaM(),
+                usuario.getPesoKg(),
                 usuario.getCriadoEm()
         );
     }

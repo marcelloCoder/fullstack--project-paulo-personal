@@ -1,6 +1,7 @@
 package com.pauloroberto.personal.auth;
 
 import com.pauloroberto.personal.comum.CredenciaisInvalidasException;
+import com.pauloroberto.personal.comum.Medidas;
 import com.pauloroberto.personal.comum.RegraNegocioException;
 import com.pauloroberto.personal.comum.Textos;
 import com.pauloroberto.personal.usuario.Papel;
@@ -40,8 +41,13 @@ public class AuthService {
         usuario.setEmail(email);
         usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
         usuario.setTelefone(Textos.limpar(request.telefone()));
+        usuario.setIdade(request.idade());
+        usuario.setProfissao(Textos.limpar(request.profissao()));
+        usuario.setAlturaM(Medidas.normalizarAltura(request.alturaM()));
+        usuario.setPesoKg(Medidas.normalizarPeso(request.pesoKg()));
+        usuario.setObjetivo(Textos.limpar(request.objetivo()));
         usuario.setPapel(Papel.ALUNO);
-        usuario.setAtivo(true);
+        usuario.setAtivo(false);
         Usuario salvo = usuarioRepository.save(usuario);
         logger.info("Aluno cadastrado: {}", salvo.getEmail());
         return UsuarioResponse.de(salvo);
@@ -73,9 +79,16 @@ public class AuthService {
         });
         usuario.setNome(request.nome().trim());
         usuario.setEmail(email);
-        usuario.setTelefone(Textos.limpar(request.telefone()));
         if (usuario.getPapel() == Papel.ALUNO) {
+            exigirDadosDoAluno(request);
+            usuario.setTelefone(Textos.limpar(request.telefone()));
             usuario.setObjetivo(Textos.limpar(request.objetivo()));
+            usuario.setIdade(request.idade());
+            usuario.setProfissao(Textos.limpar(request.profissao()));
+            usuario.setAlturaM(Medidas.normalizarAltura(request.alturaM()));
+            usuario.setPesoKg(Medidas.normalizarPeso(request.pesoKg()));
+        } else {
+            usuario.setTelefone(Textos.limpar(request.telefone()));
         }
         logger.info("Perfil atualizado: {}", usuario.getId());
         return UsuarioResponse.de(usuario);
@@ -89,6 +102,27 @@ public class AuthService {
         }
         usuario.setSenhaHash(passwordEncoder.encode(request.senhaNova()));
         logger.info("Senha alterada: {}", usuario.getId());
+    }
+
+    private void exigirDadosDoAluno(PerfilAtualizacaoRequest request) {
+        if (Textos.limpar(request.telefone()) == null) {
+            throw new RegraNegocioException(HttpStatus.BAD_REQUEST, "Informe o telefone.");
+        }
+        if (request.idade() == null) {
+            throw new RegraNegocioException(HttpStatus.BAD_REQUEST, "Informe a idade.");
+        }
+        if (Textos.limpar(request.profissao()) == null) {
+            throw new RegraNegocioException(HttpStatus.BAD_REQUEST, "Informe a profissão.");
+        }
+        if (request.alturaM() == null) {
+            throw new RegraNegocioException(HttpStatus.BAD_REQUEST, "Informe a altura.");
+        }
+        if (request.pesoKg() == null) {
+            throw new RegraNegocioException(HttpStatus.BAD_REQUEST, "Informe o peso.");
+        }
+        if (Textos.limpar(request.objetivo()) == null) {
+            throw new RegraNegocioException(HttpStatus.BAD_REQUEST, "Informe o objetivo.");
+        }
     }
 
     private Usuario carregar(Long id) {

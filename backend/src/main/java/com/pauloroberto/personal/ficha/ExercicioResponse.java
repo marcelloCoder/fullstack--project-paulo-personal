@@ -1,12 +1,15 @@
 package com.pauloroberto.personal.ficha;
 
+import java.math.BigDecimal;
+
 public record ExercicioResponse(
         Long id,
         int ordem,
         String nome,
         int series,
-        String repeticoes,
-        String carga,
-        String descanso
+        int repeticoes,
+        BigDecimal cargaKg,
+        int descansoSegundos,
+        String observacao
 ) {
 }
