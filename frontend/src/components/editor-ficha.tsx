@@ -3,7 +3,7 @@
 import { ApiError, api } from "@/lib/api";
 import { DIAS_SEMANA } from "@/lib/dias-semana";
 import { botaoAcao, botaoSecundario, campo } from "@/lib/estilos";
-import type { ExercicioRascunho, Ficha, TreinoRascunho } from "@/lib/tipos";
+import type { ExercicioRascunho, Ficha, FichaRascunho, TreinoRascunho } from "@/lib/tipos";
 import { useState } from "react";
 
 const botaoMover =
@@ -51,35 +51,43 @@ function mover<T>(lista: T[], indice: number, delta: number) {
   return copia;
 }
 
+function treinosDoRascunho(origem: Ficha | FichaRascunho | null | undefined): TreinoRascunho[] | null {
+  if (!origem?.treinos?.length) return null;
+  return origem.treinos.map((treino) => ({
+    nome: treino.nome,
+    observacao: treino.observacao ?? "",
+    diasSemana: [...(treino.diasSemana ?? [])].sort((a, b) => a - b),
+    exercicios: treino.exercicios.map((exercicio) => ({
+      nome: exercicio.nome,
+      series: exercicio.series,
+      repeticoes: exercicio.repeticoes,
+      cargaKg: Number(exercicio.cargaKg ?? 0),
+      descansoSegundos: exercicio.descansoSegundos,
+      observacao: exercicio.observacao ?? "",
+    })),
+  }));
+}
+
 export function EditorFicha({
   alunoId,
   ficha,
+  rascunhoInicial,
   onSalva,
   onCancelar,
 }: {
   alunoId: number;
   ficha: Ficha | null;
+  rascunhoInicial?: FichaRascunho | null;
   onSalva: () => Promise<void>;
   onCancelar: () => void;
 }) {
-  const [titulo, setTitulo] = useState(ficha?.titulo ?? "");
-  const [objetivo, setObjetivo] = useState(ficha?.objetivo ?? "");
-  const [observacao, setObservacao] = useState(ficha?.observacao ?? "");
-  const [inicio, setInicio] = useState(ficha?.inicio ?? new Date().toISOString().slice(0, 10));
+  const base = ficha ?? rascunhoInicial ?? null;
+  const [titulo, setTitulo] = useState(base?.titulo ?? "");
+  const [objetivo, setObjetivo] = useState(base?.objetivo ?? "");
+  const [observacao, setObservacao] = useState(base?.observacao ?? "");
+  const [inicio, setInicio] = useState(base?.inicio ?? new Date().toISOString().slice(0, 10));
   const [treinos, setTreinos] = useState<TreinoRascunho[]>(
-    ficha?.treinos.map((treino) => ({
-      nome: treino.nome,
-      observacao: treino.observacao ?? "",
-      diasSemana: [...(treino.diasSemana ?? [])].sort((a, b) => a - b),
-      exercicios: treino.exercicios.map((exercicio) => ({
-        nome: exercicio.nome,
-        series: exercicio.series,
-        repeticoes: exercicio.repeticoes,
-        cargaKg: Number(exercicio.cargaKg ?? 0),
-        descansoSegundos: exercicio.descansoSegundos,
-        observacao: exercicio.observacao ?? "",
-      })),
-    })) ?? [treinoVazio("Treino A")],
+    treinosDoRascunho(base) ?? [treinoVazio("Treino A")],
   );
   const [erro, setErro] = useState("");
   const [erros, setErros] = useState<string[]>([]);

@@ -24,9 +24,13 @@ JWT_SEGREDO=troque-este-segredo-por-um-texto-longo
 ADMIN_EMAIL=paulo@personal.local
 ADMIN_PASSWORD=troque-esta-senha
 API_URL=http://localhost:8080
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-3.5-flash
 ```
 
 `JWT_SEGREDO` precisa ter pelo menos 32 caracteres. `ADMIN_EMAIL` e `ADMIN_PASSWORD` criam a conta do Paulo na primeira subida. Se o e-mail já existir, a senha não é trocada.
+
+`GEMINI_API_KEY` ativa o assistente de IA no painel admin (cadastro de alunos e sugestão de fichas). Crie a chave gratuita em [Google AI Studio](https://aistudio.google.com/apikey). Sem essa variável, o chat responde que o assistente está indisponível. `GEMINI_MODEL` pode ficar em `gemini-3.5-flash` (tier gratuito).
 
 No PowerShell, na raiz do projeto:
 
@@ -84,6 +88,7 @@ Abra `http://localhost:3000`. O Next encaminha `/api` para a API, e o navegador 
 2. Entre com `ADMIN_EMAIL` e `ADMIN_PASSWORD` para abrir Alunos.
 3. Abra o aluno, grave uma ficha e deixe uma delas ativa.
 4. Entre de novo como aluno. A página Minha ficha mostra só essa ficha ativa.
+5. Com `GEMINI_API_KEY` definida, use o botão **Assistente IA** no admin para sugerir cadastros e fichas. Revise no formulário/editor e só então salve.
 
 ## Testes da API
 

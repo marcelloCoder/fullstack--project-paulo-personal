@@ -10,12 +10,13 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(caminho: string, init?: RequestInit): Promise<T> {
+  const corpoJson = Boolean(init?.body) && !(init?.body instanceof FormData);
   const resposta = await fetch(caminho, {
     ...init,
     credentials: "include",
     headers: {
       Accept: "application/json",
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
+      ...(corpoJson ? { "Content-Type": "application/json" } : {}),
       ...init?.headers,
     },
   });

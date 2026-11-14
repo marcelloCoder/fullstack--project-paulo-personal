@@ -1,5 +1,6 @@
 "use client";
 
+import { AssistenteAdmin } from "@/components/assistente-admin";
 import { CampoSenha } from "@/components/campo-senha";
 import { EditorFicha } from "@/components/editor-ficha";
 import { ListaFichas } from "@/components/lista-fichas";
@@ -15,7 +16,7 @@ import {
   textoParaPeso,
   pesoParaTexto,
 } from "@/lib/peso";
-import type { Aluno, Ficha } from "@/lib/tipos";
+import type { Aluno, AlunoRascunho, Ficha, FichaRascunho } from "@/lib/tipos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -153,6 +154,27 @@ export function ListaAlunos() {
     }
   }
 
+  function aplicarRascunhoAluno(rascunho: AlunoRascunho) {
+    setFormulario({
+      nome: rascunho.nome ?? "",
+      email: rascunho.email ?? "",
+      telefone: rascunho.telefone ?? "",
+      idade: rascunho.idade != null ? String(rascunho.idade) : "",
+      profissao: rascunho.profissao ?? "",
+      altura: rascunho.alturaM != null ? alturaParaTexto(rascunho.alturaM) : "",
+      peso: rascunho.pesoKg != null ? pesoParaTexto(rascunho.pesoKg) : "",
+      senha: rascunho.senha ?? "",
+      objetivo: rascunho.objetivo ?? "",
+      observacao: rascunho.observacao ?? "",
+    });
+    setCadastrando(true);
+    setErro(
+      rascunho.senha
+        ? "Rascunho da IA aplicado. Revise os dados e a senha antes de cadastrar."
+        : "Rascunho da IA aplicado. Defina a senha inicial e revise os dados antes de cadastrar.",
+    );
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -161,6 +183,7 @@ export function ListaAlunos() {
           {cadastrando ? "Fechar" : "Novo aluno"}
         </button>
       </div>
+      <AssistenteAdmin onAplicarAluno={aplicarRascunhoAluno} />
       {cadastrando && (
         <form onSubmit={cadastrar} className="mt-6 grid gap-3 rounded-md border border-linha bg-cartao p-4 sm:grid-cols-2">
           <p className="text-sm text-muted sm:col-span-2">
@@ -391,6 +414,7 @@ export function AlunoAdmin({ id }: { id: string }) {
   const [aluno, setAluno] = useState<Aluno | null>(null);
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [editando, setEditando] = useState<Ficha | null | undefined>(undefined);
+  const [rascunhoFicha, setRascunhoFicha] = useState<FichaRascunho | null>(null);
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [alternando, setAlternando] = useState(false);
@@ -415,6 +439,30 @@ export function AlunoAdmin({ id }: { id: string }) {
     setPeso(pesoParaTexto(dadosAluno.pesoKg));
     setFichas(dadosFichas);
     setEditando(undefined);
+    setRascunhoFicha(null);
+  }
+
+  function aplicarRascunhoFicha(rascunho: FichaRascunho) {
+    setRascunhoFicha({
+      titulo: rascunho.titulo ?? "",
+      objetivo: rascunho.objetivo ?? "",
+      observacao: rascunho.observacao ?? "",
+      inicio: rascunho.inicio || new Date().toISOString().slice(0, 10),
+      treinos: (rascunho.treinos ?? []).map((treino) => ({
+        nome: treino.nome ?? "",
+        observacao: treino.observacao ?? "",
+        diasSemana: [...(treino.diasSemana ?? [])],
+        exercicios: (treino.exercicios ?? []).map((exercicio) => ({
+          nome: exercicio.nome ?? "",
+          series: exercicio.series ?? 3,
+          repeticoes: exercicio.repeticoes ?? 10,
+          cargaKg: Number(exercicio.cargaKg ?? 0),
+          descansoSegundos: exercicio.descansoSegundos ?? 60,
+          observacao: exercicio.observacao ?? "",
+        })),
+      })),
+    });
+    setEditando(null);
   }
 
   useEffect(() => {
@@ -685,20 +733,32 @@ export function AlunoAdmin({ id }: { id: string }) {
 
       <ListaFichas
         fichas={fichas}
-        aoNova={() => setEditando(null)}
-        aoEditar={(ficha) => setEditando(ficha)}
+        aoNova={() => {
+          setRascunhoFicha(null);
+          setEditando(null);
+        }}
+        aoEditar={(ficha) => {
+          setRascunhoFicha(null);
+          setEditando(ficha);
+        }}
         aoAtualizar={carregar}
       />
 
       {editando !== undefined && (
         <EditorFicha
-          key={editando?.id ?? "nova"}
+          key={editando?.id ?? (rascunhoFicha ? "rascunho-ia" : "nova")}
           alunoId={aluno.id}
           ficha={editando}
+          rascunhoInicial={editando ? null : rascunhoFicha}
           onSalva={carregar}
-          onCancelar={() => setEditando(undefined)}
+          onCancelar={() => {
+            setEditando(undefined);
+            setRascunhoFicha(null);
+          }}
         />
       )}
+
+      <AssistenteAdmin alunoId={aluno.id} onAplicarFicha={aplicarRascunhoFicha} />
 
       <section className="rounded-md border border-acao/30 bg-cartao p-4">
         <h2 className="font-display text-lg uppercase tracking-wide">Excluir aluno</h2>

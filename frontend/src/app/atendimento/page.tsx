@@ -1,5 +1,5 @@
+import { AgendaAtendimento } from "@/components/agenda-atendimento";
 import { perfil } from "@/content/perfil";
-import { botaoWhatsapp } from "@/lib/estilos";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -24,14 +24,7 @@ export default function Atendimento() {
         ))}
       </div>
 
-      <section className="mt-12 max-w-2xl rounded-md border border-linha bg-cartao p-6">
-        <h2 className="font-display text-2xl uppercase tracking-wide">Horários</h2>
-        <p className="mt-3 leading-7 text-muted">{perfil.horarios}</p>
-        <a href={perfil.whatsappLink} className={`${botaoWhatsapp} mt-6`}>
-          Consultar horários no WhatsApp
-        </a>
-        <p className="mt-4 text-sm text-muted">{perfil.whatsappExibicao}</p>
-      </section>
+      <AgendaAtendimento />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.List;
 
@@ -24,6 +25,11 @@ public class TratadorDeErros {
                 .map(erro -> erro.getField() + ": " + erro.getDefaultMessage())
                 .toList();
         return ResponseEntity.badRequest().body(new ErroResponse(400, "Dados inválidos.", erros));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErroResponse> arquivoGrande(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.badRequest().body(ErroResponse.de(400, "O áudio pode ter no máximo 2 MB."));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

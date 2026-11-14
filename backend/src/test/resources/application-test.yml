@@ -18,3 +18,7 @@ app:
   cors:
     origens:
       - http://localhost:3000
+  gemini:
+    api-key:
+    model: gemini-3.5-flash
+    rate-limit-por-minuto: 20

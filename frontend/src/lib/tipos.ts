@@ -77,3 +77,34 @@ export type TreinoRascunho = {
   diasSemana: number[];
   exercicios: ExercicioRascunho[];
 };
+
+export type FichaRascunho = {
+  titulo: string;
+  objetivo: string;
+  observacao: string;
+  inicio: string;
+  treinos: TreinoRascunho[];
+};
+
+export type AlunoRascunho = {
+  nome: string;
+  email: string;
+  telefone: string;
+  senha: string;
+  idade: number | null;
+  profissao: string;
+  alturaM: number | null;
+  pesoKg: number | null;
+  objetivo: string;
+  observacao: string;
+};
+
+export type AssistenteAcao = "ORIENTACAO" | "RASCUNHO_ALUNO" | "RASCUNHO_FICHA";
+
+export type AssistenteChatResponse = {
+  resposta: string;
+  acao: AssistenteAcao;
+  rascunhoAluno: AlunoRascunho | null;
+  rascunhoFicha: FichaRascunho | null;
+  transcricao?: string | null;
+};
